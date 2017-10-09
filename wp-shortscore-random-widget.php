@@ -8,100 +8,131 @@
  */
 
 
-class My_SHORTSCORE_Widget extends WP_Widget {
+class ShortscoreWidget extends WP_Widget {
 
 	public function __construct() {
-		$widget_ops = array('classname' => 'My_SHORTSCORE_Widget', 'description' => ' Displays a random SHORTSCORE-rated game.' );
-		$this->WP_Widget('My_SHORTSCORE_Widget', 'SHORTSCORE Random Game Widget', $widget_ops);
+		$widget_ops = array( 'classname'   => 'shortscore-widget',
+		                     'description' => ' Displays a random SHORTSCORE-rated game.'
+		);
+		/* Create the widget. */
+		parent::__construct(
+			'shortscore-widget',
+			'SHORTSCORE Game',
+			$widget_ops
+		);
 	}
 
-	function widget($args, $instance) {
+	function widget( $args, $instance ) {
 		// PART 1: Extracting the arguments + getting the values
-		extract($args, EXTR_SKIP);
-		$title = empty($instance['title']) ? ' ' : apply_filters('widget_title', $instance['title']);
-		$text = empty($instance['text']) ? '' : $instance['text'];
+		extract( $args, EXTR_SKIP );
+		$title = empty( $instance['title'] ) ? ' ' : apply_filters( 'widget_title', $instance['title'] );
+		$text  = empty( $instance['text'] ) ? '' : $instance['text'];
 
 		// Before widget code, if any
-		echo (isset($before_widget)?$before_widget:'');
+		echo( isset( $before_widget ) ? $before_widget : '' );
 
 		// PART 2: The title and the text output
-		if (!empty($title))
-			echo $before_title . $title . $after_title;;
-		if (!empty($text))
-			echo $text;
+		if ( ! empty( $title ) ) {
+			echo $before_title . $title . $after_title;
+		};
+        
+		// Get any existing copy of our transient data
+		if ( false === ( $shortscore_transient_link = get_transient( 'shortscore_transient_link' ) ) ) {
+			// It wasn't there, so regenerate the data and save the transient
+			$shortscore_transient_link = $this->getGameLink();
+			set_transient( 'shortscore_transient_link', $shortscore_transient_link,  HOUR_IN_SECONDS );
+		}
 
-		$game = $this->getRandomGame();
-		$game_id = $game[0]->ID;
+		echo $shortscore_transient_link;
 
-		if ( function_exists('get_post_meta') && get_post_meta($game_id, '_shortscore_result', true) != '' ) {
+		// After widget code, if any
+		echo( isset( $after_widget ) ? $after_widget : '' );
+	}
 
-			$result = get_post_meta( $game_id, '_shortscore_result', true );
+	public function getGameLink() {
+
+		$post = $this->getRandomGame();
+
+		$post_id = $post->ID;
+
+		if ( function_exists( 'get_post_meta' ) && get_post_meta( $post_id, '_shortscore_result', true ) != '' ) {
+
+			$result = get_post_meta( $post_id, '_shortscore_result', true );
 
 			$game_title = $result->game->title;
 
 		} else {
-			$game_title = _('Sorry, no SHORTSCORE-rated games found.');
+			$game_title = __( 'Sorry, no SHORTSCORE-rated games found.' );
 		}
 
-		echo '<a href="' . get_permalink($game_id) . '">' . $game_title . '</a>';
+		$link = '<a href="' . get_permalink( $post_id ) . '">' . $game_title . '</a>';
 
-		// After widget code, if any
-		echo (isset($after_widget)?$after_widget:'');
+		return $link;
 	}
 
-	public function getRandomGame () {
+	public function getRandomGame() {
 		$args = array(
 			'numberposts' => 1,
-			'category'   => 58,
-			'meta_key' => '_shortscore_result',
-			'orderby' => 'rand'
+			'category'    => 58,
+			'meta_key'    => '_shortscore_result',
+			'orderby'     => 'rand'
 		);
 
 		$game = get_posts( $args );
 
-		return $game;
+		return $game[0];
 	}
 
 	public function form( $instance ) {
 
 		// PART 1: Extract the data from the instance variable
 		$instance = wp_parse_args( (array) $instance, array( 'title' => '' ) );
-		$title = $instance['title'];
-		$text = $instance['text'];
+		$title    = $instance['title'];
+		//$text     = $instance['text'];
 
 		// PART 2-3: Display the fields
 		?>
         <!-- PART 2: Widget Title field START -->
         <p>
-            <label for="<?php echo $this->get_field_id('title'); ?>">Title:
-                <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>"
-                       name="<?php echo $this->get_field_name('title'); ?>" type="text"
-                       value="<?php echo attribute_escape($title); ?>" />
+            <label for="<?php echo $this->get_field_id( 'title' ); ?>">Title:
+                <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>"
+                       name="<?php echo $this->get_field_name( 'title' ); ?>" type="text"
+                       value="<?php echo esc_attr( $title ); ?>"/>
             </label>
         </p>
         <!-- Widget Title field END -->
 
         <!-- PART 3: Widget Text field START -->
+        <!--
         <p>
-            <label for="<?php echo $this->get_field_id('text'); ?>">Text:
-                <input class="widefat" id="<?php echo $this->get_field_id('text'); ?>"
-                       name="<?php echo $this->get_field_name('text'); ?>" type="text"
-                       value="<?php echo attribute_escape($text); ?>" />
+            <label for="<?php echo $this->get_field_id( 'text' ); ?>">Text:
+                <input class="widefat" id="<?php echo $this->get_field_id( 'text' ); ?>"
+                       name="<?php echo $this->get_field_name( 'text' ); ?>" type="text"
+                       value="<?php echo esc_attr( $text ); ?>" />
             </label>
         </p>
+        -->
         <!-- Widget Text field END -->
 		<?php
 
 	}
 
-	function update($new_instance, $old_instance) {
-		$instance = $old_instance;
+	function update( $new_instance, $old_instance ) {
+		$instance          = $old_instance;
 		$instance['title'] = $new_instance['title'];
-		$instance['text'] = $new_instance['text'];
+		$instance['text']  = $new_instance['text'];
+
 		return $instance;
 	}
 
 }
 
-add_action( 'widgets_init', create_function('', 'return register_widget("My_SHORTSCORE_Widget");') );
+// register Shortscore widget
+
+function register_shortscore_widget() {
+	register_widget("ShortscoreWidget");
+}
+
+add_action( 'widgets_init', 'register_shortscore_widget' );
+
 ?>
