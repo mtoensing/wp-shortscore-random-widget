@@ -4,6 +4,7 @@
  * Plugin Name: SHORTSCORE Random Game Widget
  * Description: Displays a random SHORTSCORE-rated game
  * Plugin URI: https://marc.tv/shortscore-wp-plugin/
+ * GitHub Plugin URI: mtoensing/wp-shortscore-random-widget
  * Version: 1.0
  */
 
@@ -11,15 +12,13 @@
 class ShortscoreWidget extends WP_Widget {
 
 	public function __construct() {
-		$widget_ops = array( 'classname'   => 'shortscore-widget',
-		                     'description' => ' Displays a random SHORTSCORE-rated game.'
+		$widget_ops = array(
+			'classname'   => 'shortscore-widget',
+			'description' => ' Displays a random SHORTSCORE-rated game.'
 		);
+
 		/* Create the widget. */
-		parent::__construct(
-			'shortscore-widget',
-			'SHORTSCORE Game',
-			$widget_ops
-		);
+		parent::__construct( 'shortscore-widget', 'SHORTSCORE Game', $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
@@ -35,12 +34,12 @@ class ShortscoreWidget extends WP_Widget {
 		if ( ! empty( $title ) ) {
 			echo $before_title . $title . $after_title;
 		};
-        
+
 		// Get any existing copy of our transient data
 		if ( false === ( $shortscore_transient_link = get_transient( 'shortscore_transient_link' ) ) ) {
 			// It wasn't there, so regenerate the data and save the transient
 			$shortscore_transient_link = $this->getGameLink();
-			set_transient( 'shortscore_transient_link', $shortscore_transient_link,  HOUR_IN_SECONDS );
+			set_transient( 'shortscore_transient_link', $shortscore_transient_link, HOUR_IN_SECONDS );
 		}
 
 		echo $shortscore_transient_link;
@@ -130,7 +129,7 @@ class ShortscoreWidget extends WP_Widget {
 // register Shortscore widget
 
 function register_shortscore_widget() {
-	register_widget("ShortscoreWidget");
+	register_widget( "ShortscoreWidget" );
 }
 
 add_action( 'widgets_init', 'register_shortscore_widget' );
