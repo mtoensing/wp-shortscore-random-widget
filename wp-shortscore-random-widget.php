@@ -39,7 +39,7 @@ class ShortscoreWidget extends WP_Widget {
 		if ( false === ( $shortscore_transient_link = get_transient( 'shortscore_transient_link' ) ) ) {
 			// It wasn't there, so regenerate the data and save the transient
 			$shortscore_transient_link = $this->getGameLink();
-			set_transient( 'shortscore_transient_link', $shortscore_transient_link, HOUR_IN_SECONDS );
+			set_transient( 'shortscore_transient_link', $shortscore_transient_link, 300 );
 		}
 
 		echo $shortscore_transient_link;
@@ -72,7 +72,6 @@ class ShortscoreWidget extends WP_Widget {
 	public function getRandomGame() {
 		$args = array(
 			'numberposts' => 1,
-			'category'    => 58,
 			'meta_key'    => '_shortscore_result',
 			'orderby'     => 'rand'
 		);
