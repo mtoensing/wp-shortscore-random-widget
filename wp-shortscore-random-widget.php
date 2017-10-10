@@ -14,7 +14,7 @@ class ShortscoreWidget extends WP_Widget {
 	public function __construct() {
 		$widget_ops = array(
 			'classname'   => 'shortscore-widget',
-			'description' => ' Displays a random SHORTSCORE-rated game.'
+			'description' => 'Displays a random SHORTSCORE-rated game. Cache invalidates after 5 minutes.'
 		);
 
 		/* Create the widget. */
