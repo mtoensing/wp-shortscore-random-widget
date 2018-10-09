@@ -5,7 +5,7 @@
  * Description: Displays a random SHORTSCORE-rated game
  * Plugin URI: https://marc.tv/shortscore-wp-plugin/
  * GitHub Plugin URI: mtoensing/wp-shortscore-random-widget
- * Version: 1.1
+ * Version: 1.2
  */
 
 
@@ -14,7 +14,7 @@ class ShortscoreWidget extends WP_Widget {
 	public function __construct() {
 		$widget_ops = array(
 			'classname'   => 'shortscore-widget',
-			'description' => 'Displays a random SHORTSCORE-rated game. Cache invalidates after 5 minutes.'
+			'description' => ' Displays a random SHORTSCORE-rated game.'
 		);
 
 		/* Create the widget. */
@@ -61,7 +61,7 @@ class ShortscoreWidget extends WP_Widget {
 			$game_title = $result->game->title;
 
 		} else {
-			$game_title = __( 'Sorry, no SHORTSCORE-rated games found.' );
+			$game_title = get_the_title($post_id);
 		}
 
 		$link = '<a href="' . get_permalink( $post_id ) . '">' . $game_title . '</a>';
@@ -70,15 +70,31 @@ class ShortscoreWidget extends WP_Widget {
 	}
 
 	public function getRandomGame() {
+
+	    /*
 		$args = array(
 			'numberposts' => 1,
-			'meta_key'    => '_shortscore_result',
+			'meta_key'    => '_shortscore_user_rating',
 			'orderby'     => 'rand'
 		);
+	    */
 
-		$game = get_posts( $args );
+		$args = array(
+			'numberposts' => 1,
+			'meta_query' => [
+				[
+					'key'     => '_shortscore_user_rating',
+					'value'   => 1,
+					'type'    => 'numeric',
+					'compare' => '>',
+				],
+			],
+			'orderby' => 'rand'
+		);
 
-		return $game[0];
+		$games = get_posts( $args );
+
+		return $games[0];
 	}
 
 	public function form( $instance ) {
