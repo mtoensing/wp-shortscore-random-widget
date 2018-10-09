@@ -5,7 +5,7 @@
  * Description: Displays a random SHORTSCORE-rated game
  * Plugin URI: https://marc.tv/shortscore-wp-plugin/
  * GitHub Plugin URI: mtoensing/wp-shortscore-random-widget
- * Version: 1.2
+ * Version: 1.3
  */
 
 
@@ -37,9 +37,9 @@ class ShortscoreWidget extends WP_Widget {
 
 		// Get any existing copy of our transient data
 		if ( false === ( $shortscore_transient_link = get_transient( 'shortscore_transient_link' ) ) ) {
-			// It wasn't there, so regenerate the data and save the transient
-			$shortscore_transient_link = $this->getGameLink();
-			set_transient( 'shortscore_transient_link', $shortscore_transient_link, 300 );
+		    // It wasn't there, so regenerate the data and save the transient
+		    $shortscore_transient_link = $this->getGameLink();
+		    set_transient( 'shortscore_transient_link', $shortscore_transient_link, 300 );
 		}
 
 		echo $shortscore_transient_link;
@@ -60,8 +60,10 @@ class ShortscoreWidget extends WP_Widget {
 
 			$game_title = $result->game->title;
 
-		} else {
-			$game_title = get_the_title($post_id);
+		}
+
+		if ( $game_title == '' ) {
+			$game_title = get_the_title( $post_id );
 		}
 
 		$link = '<a href="' . get_permalink( $post_id ) . '">' . $game_title . '</a>';
@@ -71,25 +73,25 @@ class ShortscoreWidget extends WP_Widget {
 
 	public function getRandomGame() {
 
-	    /*
+		/*
 		$args = array(
 			'numberposts' => 1,
 			'meta_key'    => '_shortscore_user_rating',
 			'orderby'     => 'rand'
 		);
-	    */
+		*/
 
 		$args = array(
 			'numberposts' => 1,
-			'meta_query' => [
+			'meta_query'  => [
 				[
 					'key'     => '_shortscore_user_rating',
-					'value'   => 1,
+					'value'   => 2,
 					'type'    => 'numeric',
 					'compare' => '>',
 				],
 			],
-			'orderby' => 'rand'
+			'orderby'     => 'rand'
 		);
 
 		$games = get_posts( $args );
