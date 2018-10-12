@@ -5,11 +5,13 @@
  * Description: Displays a random SHORTSCORE-rated game
  * Plugin URI: https://marc.tv/shortscore-wp-plugin/
  * GitHub Plugin URI: mtoensing/wp-shortscore-random-widget
- * Version: 1.3
+ * Version: 1.4
  */
 
 
 class ShortscoreWidget extends WP_Widget {
+
+    private $cache = false;
 
 	public function __construct() {
 		$widget_ops = array(
@@ -36,11 +38,15 @@ class ShortscoreWidget extends WP_Widget {
 		};
 
 		// Get any existing copy of our transient data
-		if ( false === ( $shortscore_transient_link = get_transient( 'shortscore_transient_link' ) ) ) {
-		    // It wasn't there, so regenerate the data and save the transient
-		    $shortscore_transient_link = $this->getGameLink();
-		    set_transient( 'shortscore_transient_link', $shortscore_transient_link, 300 );
-		}
+        if($this->cache == true){
+            if ( false === ( $shortscore_transient_link = get_transient( 'shortscore_transient_link' ) ) ) {
+                // It wasn't there, so regenerate the data and save the transient
+                $shortscore_transient_link = $this->getGameLink();
+                set_transient( 'shortscore_transient_link', $shortscore_transient_link, 300 );
+            }
+        } else {
+	        $shortscore_transient_link = $this->getGameLink();
+        }
 
 		echo $shortscore_transient_link;
 
@@ -51,15 +57,17 @@ class ShortscoreWidget extends WP_Widget {
 	public function getGameLink() {
 
 		$post = $this->getRandomGame();
-
 		$post_id = $post->ID;
 
 		if ( function_exists( 'get_post_meta' ) && get_post_meta( $post_id, '_shortscore_result', true ) != '' ) {
 
 			$result = get_post_meta( $post_id, '_shortscore_result', true );
 
-			$game_title = $result->game->title;
+			if(! is_object($result) ){
+				$result = json_decode(json_encode($result));
+            }
 
+			$game_title = $result->game->title;
 		}
 
 		if ( $game_title == '' ) {
@@ -72,14 +80,6 @@ class ShortscoreWidget extends WP_Widget {
 	}
 
 	public function getRandomGame() {
-
-		/*
-		$args = array(
-			'numberposts' => 1,
-			'meta_key'    => '_shortscore_user_rating',
-			'orderby'     => 'rand'
-		);
-		*/
 
 		$args = array(
 			'numberposts' => 1,
