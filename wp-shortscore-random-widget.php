@@ -5,13 +5,13 @@
  * Description: Displays a random SHORTSCORE-rated game
  * Plugin URI: https://marc.tv/shortscore-wp-plugin/
  * GitHub Plugin URI: mtoensing/wp-shortscore-random-widget
- * Version: 1.4
+ * Version: 1.5
  */
 
 
 class ShortscoreWidget extends WP_Widget {
 
-    private $cache = false;
+    private $cache = true;
 
 	public function __construct() {
 		$widget_ops = array(
